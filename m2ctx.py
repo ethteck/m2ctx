@@ -19,16 +19,20 @@ CPP_FLAGS = [
     "-DF3DEX_GBI_2",
     "-D_MIPS_SZLONG=32",
     "-DSCRIPT(...)={}"
+    "-D__attribute__(...)=",
+    "-D__asm__(...)=",
     "-ffreestanding",
 ]
 
 def import_c_file(in_file) -> str:
     in_file = os.path.relpath(in_file, root_dir)
-    cpp_command = ["gcc", "-E", "-P", "-dD", *CPP_FLAGS, in_file]
+    cpp_command = ["gcc", "-E", "-P", "-dM", *CPP_FLAGS, in_file]
+    cpp_command2 = ["gcc", "-E", "-P", *CPP_FLAGS, in_file]
 
     out_text = ""
     try:
         out_text += subprocess.check_output(cpp_command, cwd=root_dir, encoding="utf-8")
+        out_text += subprocess.check_output(cpp_command2, cwd=root_dir, encoding="utf-8")
     except subprocess.CalledProcessError:
         print(
             "Failed to preprocess input file, when running command:\n"
@@ -52,17 +56,10 @@ def main():
     )
     args = parser.parse_args()
 
-    processed = import_c_file(args.c_file)
-    processed_lines = processed.splitlines()
-    output = []
-
-    for line in processed_lines:
-        if ("__attribute__" not in line
-            and "__asm" not in line):
-            output.append(line)
+    output = import_c_file(args.c_file)
 
     with open(os.path.join(root_dir, "ctx.c"), "w", encoding="UTF-8") as f:
-        f.write("\n".join(output))
+        f.write(output)
 
 
 if __name__ == "__main__":
