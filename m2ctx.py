@@ -18,7 +18,7 @@ CPP_FLAGS = [
     "-D_LANGUAGE_C",
     "-DF3DEX_GBI_2",
     "-D_MIPS_SZLONG=32",
-    "-DSCRIPT(...)={}"
+    "-DSCRIPT(...)={}",
     "-D__attribute__(...)=",
     "-D__asm__(...)=",
     "-ffreestanding",
@@ -40,7 +40,7 @@ def import_c_file(in_file) -> str:
     except subprocess.CalledProcessError:
         print(
             "Failed to preprocess input file, when running command:\n"
-            + cpp_command,
+            + ' '.join(cpp_command),
             file=sys.stderr,
             )
         sys.exit(1)
